@@ -1,5 +1,7 @@
 //Most of this should be something we recognize, but we had to add a babel preset, stage-2, and also
-//transform-decorators-legacy. 
+//transform-decorators-legacy. These are so that we can use transform decorators, as well as the spread operator (...)
+
+//Look at line 30 and 31 for these changes
 
 const path = require('path');
 const srcPath = path.resolve(__dirname, 'src');

@@ -39291,7 +39291,12 @@ exports.TimerStore = exports.Timer = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _desc, _value, _class, _descriptor, _descriptor2, _desc2, _value2, _class3, _descriptor3, _descriptor4, _descriptor5, _descriptor6;
+var _desc, _value, _class, _descriptor, _descriptor2, _desc2, _value2, _class3, _descriptor3, _descriptor4, _descriptor5, _descriptor6; // Import the observable, computed, and action methods from mobx
+
+// Import uuid, so that we can give each lap entry it's own unique identifier.
+
+// Import the moment library, which is for parsing and manipulating dates.
+
 
 var _mobx = __webpack_require__(42);
 
@@ -39352,7 +39357,18 @@ function _initializerWarningHelper(descriptor, context) {
   throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
 }
 
+/*
+  Now, we are creating and exporting our Timer class. This is where our data is actually being generated.
+
+  When we see or use import or require in Node, we are actually accessing a *module*. Modules help
+  us encapsulate the methods for easier use in other files.
+*/
 var Timer = exports.Timer = (_class = function () {
+
+  /*
+    We want to define some default values. With a timer, we want to start at 0.
+    We also generate a unique identifier (UUID = Universally Unique Identifier)
+   */
   function Timer() {
     var initialMilliseconds = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -39367,12 +39383,25 @@ var Timer = exports.Timer = (_class = function () {
     this.id = (0, _nodeUuid.v4)();
   }
 
+  /*
+    Here, we define our first action, where we can update the savedMilliseconds, to match the current.
+    This will also return our main timer to 0.
+     Note: In strict mode, which we are in, you can only change an observable using an action. These are
+    where our data *changes*
+  */
+
+
   _createClass(Timer, [{
     key: 'saveTime',
     value: function saveTime() {
       this.savedMilliseconds += this.milliseconds;
       this.milliseconds = 0;
     }
+
+    /*
+      Our reset() action will simply return both the milliseconds and the savedMilliseconds to 0.
+    */
+
   }, {
     key: 'reset',
     value: function reset() {
@@ -39403,7 +39432,16 @@ var Timer = exports.Timer = (_class = function () {
   enumerable: true,
   initializer: null
 }), _applyDecoratedDescriptor(_class.prototype, 'saveTime', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'saveTime'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'reset', [_mobx.action], Object.getOwnPropertyDescriptor(_class.prototype, 'reset'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'totalMilliSeconds', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'totalMilliSeconds'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'display', [_mobx.computed], Object.getOwnPropertyDescriptor(_class.prototype, 'display'), _class.prototype)), _class);
+
+/*
+  Now, the TimerStore class is defined.
+*/
+
 var TimerStore = exports.TimerStore = (_class3 = function () {
+
+  /*
+    Our constructor allows us to define our initial values for these observables.
+  */
   function TimerStore() {
     _classCallCheck(this, TimerStore);
 
@@ -39420,6 +39458,13 @@ var TimerStore = exports.TimerStore = (_class3 = function () {
     this.laps = [];
   }
 
+  /*
+    Computed values rely on the data in state. They are DERIVED from observables, and
+    allow us to get a value from the observable state.
+    If we get the mainDisplay, we are retrieving an observable from the timer.
+  */
+
+
   _createClass(TimerStore, [{
     key: 'measure',
     value: function measure() {
@@ -39429,6 +39474,7 @@ var TimerStore = exports.TimerStore = (_class3 = function () {
 
       this.timer.milliseconds = (0, _moment2.default)().diff(this.startTime);
 
+      // This will be measured after 10 milliseconds have passed.
       setTimeout(function () {
         return _this.measure();
       }, 10);
@@ -39464,11 +39510,21 @@ var TimerStore = exports.TimerStore = (_class3 = function () {
     get: function get() {
       return this.timer.display;
     }
+
+    /*
+      Here, we return a boolean value, representing whether or not our timer is running.
+    */
+
   }, {
     key: 'hasStarted',
     get: function get() {
       return this.timer.totalMilliSeconds !== 0;
     }
+
+    /*
+      Here, we update our Timer.milliseconds using the difference between now and the startTime
+    */
+
   }, {
     key: 'length',
     get: function get() {
@@ -39523,10 +39579,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /**
-                                                                                                                                                                                                                                                                   * In this file, we create a React component
-                                                                                                                                                                                                                                                                   * which incorporates components providedby material-ui.
-                                                                                                                                                                                                                                                                   */
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /*
+                                                                                                                                                                                                                                                                      Here, we define our Main component, and we also provide the logic to pass certain
+                                                                                                                                                                                                                                                                      observables from the Timer to our JSX.
+                                                                                                                                                                                                                                                                  */
+
+// Import the observer method, which we can access using the observer decorator (ES.next)
+// Read more about decorators in mobx here: https://mobx.js.org/best/decorators.html
+
 
 var _react = __webpack_require__(43);
 
@@ -39536,6 +39596,11 @@ var _mobxReact = __webpack_require__(331);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/*
+  Below, we are creating our timer's display elements.
+  You can use style={{property:value}} in JSX, but I won't recommend really doing this
+  On your own projects quite yet. Stick with CSS and className.
+*/
 var TimerDisplay = function TimerDisplay(_ref) {
   var timer = _ref.timer,
       text = _ref.text;
@@ -39589,12 +39654,23 @@ var ButtonStyle = {
   background: 'white'
 };
 
+/*
+  Now here is our Main component. We are defining some elements for the buttons and pointing them
+  to the appropriate TimerStore methods, and we are also retrieving the mainDisplay and lap data.
+
+  Take a look in TimerStore for the methods we call below.
+*/
+
 var Main = (0, _mobxReact.observer)(function (_ref2) {
   var timerStore = _ref2.timerStore;
 
+  //the buttons will change depending on what is happening, so let them.
   var firstButton = void 0;
   var secondButton = void 0;
 
+  //If the timer is currently running, the buttons will be this:
+  //Note: Notice the methods that we are calling to in the onClick, and how they are different
+  //between the if and else.
   if (!timerStore.isRunning) {
     secondButton = _react2.default.createElement(
       'button',
@@ -39621,6 +39697,8 @@ var Main = (0, _mobxReact.observer)(function (_ref2) {
     if (!timerStore.hasStarted) {
       firstButton = null;
     }
+
+    //otherwise, if the timer isn't running:
   } else {
     secondButton = _react2.default.createElement(
       'button',
@@ -62703,10 +62781,20 @@ var _mobx = __webpack_require__(42);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// Import the TimerStore class from our TimerStore.js file, so that we can pass it into our Main component.
 (0, _mobx.useStrict)(true);
 
+// Create an instance of our TimerStore
+
+
+// Always useStrict with mobx.
+
+
+// Import our Main component
+// Below we are importing React, as well as ReactDOM, to access it's methods.
 var timerStore = new _TimerStore.TimerStore();
 
+// Render the Main component, and pass in our timerStore.
 _reactDom2.default.render(_react2.default.createElement(_main2.default, { timerStore: timerStore }), document.getElementById('app'));
 
 /***/ }),

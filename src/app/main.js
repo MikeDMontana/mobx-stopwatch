@@ -1,11 +1,18 @@
-/**
- * In this file, we create a React component
- * which incorporates components providedby material-ui.
- */
+/*
+    Here, we define our Main component, and we also provide the logic to pass certain
+    observables from the Timer to our JSX.
+*/
 
 import React from 'react';
+// Import the observer method, which we can access using the observer decorator (ES.next)
+// Read more about decorators in mobx here: https://mobx.js.org/best/decorators.html
 import {observer} from 'mobx-react';
 
+/*
+  Below, we are creating our timer's display elements.
+  You can use style={{property:value}} in JSX, but I won't recommend really doing this
+  On your own projects quite yet. Stick with CSS and className.
+*/
 const TimerDisplay = ({timer, text}) => {
   return (
     <div
@@ -52,10 +59,21 @@ const ButtonStyle = {
   background: 'white',
 };
 
+/*
+  Now here is our Main component. We are defining some elements for the buttons and pointing them
+  to the appropriate TimerStore methods, and we are also retrieving the mainDisplay and lap data.
+
+  Take a look in TimerStore for the methods we call below.
+*/
+
 const Main = observer(({timerStore}) => {
+  //the buttons will change depending on what is happening, so let them.
   let firstButton;
   let secondButton;
 
+  //If the timer is currently running, the buttons will be this:
+  //Note: Notice the methods that we are calling to in the onClick, and how they are different
+  //between the if and else.
   if (!timerStore.isRunning) {
     secondButton = (
       <button
@@ -78,6 +96,8 @@ const Main = observer(({timerStore}) => {
     if (!timerStore.hasStarted) {
       firstButton = null;
     }
+
+  //otherwise, if the timer isn't running:
   } else {
     secondButton = (
       <button
